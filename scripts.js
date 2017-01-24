@@ -13,6 +13,7 @@
       y: height/2
     },
     r = center.x;
+  var parseDate = d3.timeParse("%d/%m/%Y");
   var svg = d3.select(".chart").append("svg")
     .attr("version", "1.1")
     .attr("viewBox", "0 0 "+(width + margin.left + margin.right)+" "+(height + margin.top + margin.bottom))
@@ -52,5 +53,29 @@
   var line = d3.radialLine()
     .angle(function(d) { return angle(d.date); })
     .radius(function(d) { return radius(d.volume); });
+  var angle = d3.scaleTime().range([0, 2 * Math.PI]);
+  var radius = d3.scaleLinear().range([0, r]);
+
+  d3.json("data.json", function(error, json) {
+    if (error) throw error;
+
+    var data = [];
+		json.volumes.forEach(function(d) {
+      data.push({
+        date: parseDate(d.DataInformacao),
+        volume: +d.VolumePercentual
+      });
+    });
+
+    angle.domain([0, d3.max(data, function(d) { return d.date; })]);
+    radius.domain([0, d3.max(data, function(d) { return d.volume; })]);
+
+    console.log(data);
+    g.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line);
+
+  });
 
 })();
