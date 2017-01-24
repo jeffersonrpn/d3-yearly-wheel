@@ -34,19 +34,23 @@
     {month: "Nov", angle: 300},
     {month: "Dez", angle: 330}];
 
-    var ga = g.append("g").attr("class", "axis a")
-      .selectAll("g")
-        .data(angles)
-      .enter().append("g")
-        .attr("transform", function(d) { return "rotate(" + -d.angle + ")"; });
-    ga.append("line")
-      .attr("x2", r);
+  var ga = g.append("g").attr("class", "axis a")
+    .selectAll("g")
+      .data(angles)
+    .enter().append("g")
+      .attr("transform", function(d) { return "rotate(" + -d.angle + ")"; });
+  ga.append("line")
+    .attr("x2", r);
 
-    ga.append("text")
-      .attr("x", r + 6)
-      .attr("dy", ".35em")
-      .style("text-anchor", function(d) { return d < 270 && d > 90 ? "end" : null; })
-      .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (r+6) + ",0)" : null; })
-      .text(function(d) { return d.month; });
+  ga.append("text")
+    .attr("x", r + 6)
+    .attr("dy", ".35em")
+    .style("text-anchor", function(d) { return d < 270 && d > 90 ? "end" : null; })
+    .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (r+6) + ",0)" : null; })
+    .text(function(d) { return d.month; });
+
+  var line = d3.radialLine()
+    .angle(function(d) { return angle(d.date); })
+    .radius(function(d) { return radius(d.volume); });
 
 })();
