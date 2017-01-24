@@ -1,24 +1,18 @@
 (function() {
   var
     margin = {
-      top: 10,
-      left: 10,
-      right: 10,
-      bottom: 10
+      top: 40,
+      left: 40,
+      right: 40,
+      bottom: 40
     },
-    width = 1000,
-    height = 1000,
+    width = 800,
+    height = 800,
     center = {
       x: width/2,
       y: height/2
     },
     r = center.x;
-  function cosX(x) {
-    return Math.round( (Math.cos(x * (Math.PI / 180)))*100) / 100;
-  }
-  function sinX(x) {
-    return Math.round( (Math.sin(x * (Math.PI / 180)))*100) / 100;
-  }
   var svg = d3.select(".chart").append("svg")
     .attr("version", "1.1")
     .attr("viewBox", "0 0 "+(width + margin.left + margin.right)+" "+(height + margin.top + margin.bottom))
@@ -40,14 +34,19 @@
     {month: "Nov", angle: 300},
     {month: "Dez", angle: 330}];
 
-  g.selectAll("line")
-    .data(angles).enter()
-    .append("line")
-      .attr("x1", 0)
-      .attr("y1", 0)
-      .attr("x2", function(d) { return cosX(d.angle) * r })
-      .attr("y2", function(d) { return sinX(d.angle) * r })
-      .attr("class", "axis angle")
-      .attr("id", function(d) { return d.month });
+    var ga = g.append("g").attr("class", "axis a")
+      .selectAll("g")
+        .data(angles)
+      .enter().append("g")
+        .attr("transform", function(d) { return "rotate(" + -d.angle + ")"; });
+    ga.append("line")
+      .attr("x2", r);
+
+    ga.append("text")
+      .attr("x", r + 6)
+      .attr("dy", ".35em")
+      .style("text-anchor", function(d) { return d < 270 && d > 90 ? "end" : null; })
+      .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (r+6) + ",0)" : null; })
+      .text(function(d) { return d.month; });
 
 })();
