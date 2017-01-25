@@ -50,13 +50,13 @@
     .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (r+6) + ",0)" : null; })
     .text(function(d) { return d.month; });
 
+  var angle = d3.scaleTime().range([0, 2 * Math.PI]);
+  var radius = d3.scaleLinear().range([0, r]);
   var line = d3.radialLine()
     .angle(function(d) { return angle(d.date); })
     .radius(function(d) { return radius(d.volume); });
-  var angle = d3.scaleTime().range([0, 2 * Math.PI]);
-  var radius = d3.scaleLinear().range([0, r]);
 
-  d3.json("data.json", function(error, json) {
+  d3.json("sample.json", function(error, json) {
     if (error) throw error;
 
     var data = [];
@@ -67,14 +67,21 @@
       });
     });
 
-    angle.domain([0, d3.max(data, function(d) { return d.date; })]);
+    angle.domain([d3.min(data, function(d) { return d.date; }), d3.max(data, function(d) { return d.date; })]);
     radius.domain([0, d3.max(data, function(d) { return d.volume; })]);
 
-    console.log(data);
+    console.log(2 * Math.PI);
+    console.log(d3.min(data, function(d) { return d.date; }));
+    console.log(d3.max(data, function(d) { return d.date; }));
+
+    console.log(angle(d3.min(data, function(d) { return d.date; })));
+    console.log(angle(d3.max(data, function(d) { return d.date; })));
+
+    svgline = line(data);
+
     g.append("path")
-      .datum(data)
       .attr("class", "line")
-      .attr("d", line);
+      .attr("d", svgline);
 
   });
 

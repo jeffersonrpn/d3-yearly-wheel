@@ -1,0 +1,9 @@
+{
+  "volumes":
+  [
+    {"DataInformacao": "31/01/1990", "Volume": "518.39", "VolumePercentual": "96.77"},
+    {"DataInformacao": "28/02/1990", "Volume": "520.97", "VolumePercentual": "97.25"},
+    {"DataInformacao": "31/03/1990", "Volume": "514.72", "VolumePercentual": "96.08"},
+    {"DataInformacao": "30/04/1990", "Volume": "510.67", "VolumePercentual": "95.33"}
+  ]
+}
