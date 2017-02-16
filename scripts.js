@@ -13,7 +13,7 @@
       y: height/2
     },
     r = center.x;
-  var parseDate = d3.timeParse("%d/%m/%Y");
+  var parseDate = d3.timeParse("%Y-%m-%d");
   var svg = d3.select(".chart").append("svg")
     .attr("version", "1.1")
     .attr("viewBox", "0 0 "+(width + margin.left + margin.right)+" "+(height + margin.top + margin.bottom))
@@ -43,20 +43,20 @@
   ga.append("line")
     .attr("x2", r);
 
-  ga.append("text")
-    .attr("x", r + 6)
-    .attr("dy", ".35em")
-    .style("text-anchor", function(d) { return d < 270 && d > 90 ? "end" : null; })
-    .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (r+6) + ",0)" : null; })
-    .text(function(d) { return d.month; });
+  // ga.append("text")
+  //   .attr("x", r + 6)
+  //   .attr("dy", ".35em")
+  //   .style("text-anchor", function(d) { return d < 270 && d > 90 ? "end" : null; })
+  //   .attr("transform", function(d) { return d < 270 && d > 90 ? "rotate(180 " + (r+6) + ",0)" : null; })
+  //   .text(function(d) { return d.month; });
 
   var angle = d3.scaleTime().range([0, 2 * Math.PI]);
-  var radius = d3.scaleLinear().range([0, r]).domain([0, 100]);
+  var radius = d3.scaleLinear().range([0, r]);
   var line = d3.radialLine()
     .angle(function(d) { return angle(d.date); })
     .radius(function(d) { return radius(d.volume); });
 
-  d3.json("https://wwws-cloud.lsd.ufcg.edu.br:42160/api/reservatorios/12172/monitoramento", function(error, json) {
+  d3.json("http://enchentes.infoamazonia.org:8080/station/14990000/history", function(error, json) {
     if (error) throw error;
 
     var
@@ -65,10 +65,10 @@
       year,
       date,
       svgline;
-		json.volumes.forEach(function(d) {
-      date = parseDate(d.DataInformacao);
+		json.data.forEach(function(d) {
+      date = parseDate(d.timestamp);
       year = date.getFullYear();
-      // if (year >= 2007 && year <= 2017) {
+      // if (year >= 2007 && year <= 2008) {
         if (year !== currentYear) {
           currentYear = year;
           years[currentYear] = {
@@ -76,16 +76,19 @@
             data: []
           }
         }
-        years[currentYear].data.push({
-          date: date,
-          volume: +d.VolumePercentual
-        });
+        if (d.measured > 0) {
+          years[currentYear].data.push({
+            date: date,
+            volume: +d.measured
+          });
+        }
       // }
     });
 
     years.forEach(function(year) {
       console.log(year);
       angle.domain([new Date(year.year+'-01-01'), new Date(year.year+'-12-31')]);
+      radius.domain([d3.min(year.data, function(d) { return d.volume; }), d3.max(year.data, function(d) { return d.volume; })]);
       svgline = line(year.data);
       g.append("path")
         .attr("id", year.year)
