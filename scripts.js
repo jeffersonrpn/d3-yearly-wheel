@@ -1,10 +1,10 @@
 (function() {
   var
     margin = {
-      top: 40,
-      left: 40,
-      right: 40,
-      bottom: 40
+      top: 60,
+      left: 60,
+      right: 60,
+      bottom: 60
     },
     width = 800,
     height = 800,
@@ -51,37 +51,47 @@
     .text(function(d) { return d.month; });
 
   var angle = d3.scaleTime().range([0, 2 * Math.PI]);
-  var radius = d3.scaleLinear().range([0, r]);
+  var radius = d3.scaleLinear().range([0, r]).domain([0, 100]);
   var line = d3.radialLine()
     .angle(function(d) { return angle(d.date); })
     .radius(function(d) { return radius(d.volume); });
 
-  d3.json("sample.json", function(error, json) {
+  d3.json("https://wwws-cloud.lsd.ufcg.edu.br:42160/api/reservatorios/12172/monitoramento", function(error, json) {
     if (error) throw error;
 
-    var data = [];
+    var
+      years = [],
+      currentYear = 0,
+      year,
+      date,
+      svgline;
 		json.volumes.forEach(function(d) {
-      data.push({
-        date: parseDate(d.DataInformacao),
-        volume: +d.VolumePercentual
-      });
+      date = parseDate(d.DataInformacao);
+      year = date.getFullYear();
+      // if (year >= 2007 && year <= 2017) {
+        if (year !== currentYear) {
+          currentYear = year;
+          years[currentYear] = {
+            year: currentYear,
+            data: []
+          }
+        }
+        years[currentYear].data.push({
+          date: date,
+          volume: +d.VolumePercentual
+        });
+      // }
     });
 
-    angle.domain([d3.min(data, function(d) { return d.date; }), d3.max(data, function(d) { return d.date; })]);
-    radius.domain([0, d3.max(data, function(d) { return d.volume; })]);
-
-    console.log(2 * Math.PI);
-    console.log(d3.min(data, function(d) { return d.date; }));
-    console.log(d3.max(data, function(d) { return d.date; }));
-
-    console.log(angle(d3.min(data, function(d) { return d.date; })));
-    console.log(angle(d3.max(data, function(d) { return d.date; })));
-
-    svgline = line(data);
-
-    g.append("path")
-      .attr("class", "line")
-      .attr("d", svgline);
+    years.forEach(function(year) {
+      console.log(year);
+      angle.domain([new Date(year.year+'-01-01'), new Date(year.year+'-12-31')]);
+      svgline = line(year.data);
+      g.append("path")
+        .attr("id", year.year)
+        .attr("class", "line")
+        .attr("d", svgline);
+    })
 
   });
 
